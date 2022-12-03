@@ -14,16 +14,16 @@ contract DeDup {
         mapping(bytes32=>bool) isConfirmedByOwner; // Flag to indicate whether owner approved the deal
         mapping(address=>uint) userPayTime; // Store the block.number of the user payment
     }
-    mapping(bytes32 => bool) public CIDExsists;  // A mapping to know duplicate CID
-    mapping(bytes32 => data) Data;               // A mapping of the struct data
+    mapping(string => bool) public CIDExsists;  // A mapping to know duplicate CID
+    mapping(string => data) Data;               // A mapping of the struct data
     mapping(address => uint256) public refundPending; // A mapping to know a owners refunded amount
     address payable public Admin;                  // Admin address
     uint256 public pricePerKBInWei;             // Price per KB in wei
     uint256 public AdminPay;             // Pay to be received by Admin
     
     event AcknowledgeReceivePay(string ack);
-    event AdminConfirmation(bytes32 CID, address owner);
-    event OwnerConfirmation(bytes32 CID, address owner);
+    event AdminConfirmation(string CID, address owner);
+    event OwnerConfirmation(string CID, address owner);
     /** constructor 
      * input: uint256 - represent price per KB In wei
      * returns nil */
@@ -61,7 +61,7 @@ contract DeDup {
      * output: nil
      * events: AcknowledgeReceivePay(string)
      */
-    function receivePay(bytes32 CID) external payable {
+    function receivePay(string memory CID) external payable {
         require(msg.value >= Data[CID].currentPrice);
         Data[CID].moneyToDistribute += msg.value;
         Data[CID].isPaid[msg.sender] = msg.value;
@@ -76,7 +76,7 @@ contract DeDup {
      * events: AdminConfirmation, OwnerConfirmation
      */
     function addOwner(
-        bytes32 CID,
+        string memory CID,
         uint256 sizeInKB,
         address owner
     ) public {
@@ -107,7 +107,7 @@ contract DeDup {
      * inputs: bytes32, uint256
      * output: uint256
      */
-    function getCurrentPrice(bytes32 CID, uint256 sizeInKB)
+    function getCurrentPrice(string memory CID, uint256 sizeInKB)
         public
         view
         returns (uint256)
@@ -126,7 +126,7 @@ contract DeDup {
      * output: nil
      */
 
-    function updatePrice(bytes32 CID) internal {
+    function updatePrice(string memory CID) internal {
         uint256 remaining = Data[CID].moneyToDistribute / (Data[CID].numOwners);
         for (uint256 i = 0; i < Data[CID].numOwners; i++) {
             refundPending[Data[CID].owners[i]] += remaining;
@@ -162,7 +162,7 @@ contract DeDup {
      * input: bytes32
      * output: nil
      */
-    function refundOwner(bytes32 CID) payable external{
+    function refundOwner(string memory CID) payable external{
         require(block.number > Data[CID].userPayTime[msg.sender] + 20);
         require(!Data[CID].isConfirmedByOwner[keccak256(abi.encodePacked(msg.sender))]);
         payable(msg.sender).transfer(Data[CID].isPaid[msg.sender]);
@@ -171,7 +171,7 @@ contract DeDup {
      * input: bytes32
      * output: bool
      */
-    function isCIDExsists(bytes32 CID) public view returns (bool) {
+    function isCIDExsists(string memory CID) public view returns (bool) {
         return CIDExsists[CID];
     }
 }
