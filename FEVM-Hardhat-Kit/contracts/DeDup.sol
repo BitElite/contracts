@@ -144,9 +144,9 @@ contract DeDup {
      */
     function withDrawUser() external payable {
         address payable receiver = payable(msg.sender);
-        //emit test(refundPending[msg.sender]);
-        receiver.transfer(refundPending[msg.sender]);
+        uint amountToBeTransfered = refundPending[msg.sender];
         refundPending[msg.sender] = 0;
+        receiver.transfer(amountToBeTransfered);        
     }
     /** withDrawAdmin
      * This function helps Admin to withdraw accumulated coins
@@ -154,8 +154,9 @@ contract DeDup {
      * output: nil
      */
     function withDrawAdmin() external payable onlyAdmin {
-        Admin.transfer(AdminPay);
-        AdminPay = 0;
+        uint amountToBeTransfered = AdminPay;
+        AdminPay =0;
+        Admin.transfer(amountToBeTransfered);
     }
     /** refundOwner
      * This function user to withdraw funds if either of the Admin or owner not confirm the deal
@@ -165,7 +166,9 @@ contract DeDup {
     function refundOwner(string memory CID) payable external{
         require(block.number > Data[CID].userPayTime[msg.sender] + 20);
         require(!Data[CID].isConfirmedByOwner[keccak256(abi.encodePacked(msg.sender))]);
-        payable(msg.sender).transfer(Data[CID].isPaid[msg.sender]);
+        uint amountToBeTransferred = Data[CID].isPaid[msg.sender];
+        Data[CID].isPaid[msg.sender] = 0;
+        payable(msg.sender).transfer(amountToBeTransferred);
     }
     /** isCIDExsists
      * input: bytes32
