@@ -59,7 +59,7 @@ module.exports = async ({ deployments }) => {
   });
   await deploy("DeDup", {
     from: deployer.address,
-    args: [100],
+    args: [1000000000000000],
     // since it's difficult to estimate the gas before f4 address is launched, it's safer to manually set
     // a large gasLimit. This should be addressed in the following releases.
     // since Ethereum's legacy transaction format is not supported on FVM, we need to specify
